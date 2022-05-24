@@ -1,0 +1,44 @@
+{
+	"creator":{
+		"id":"8be122b4-596f-4e4f-a307-978bed0ffb75",
+		"name":"Firefly",
+		"royalty": "0.1"
+	},
+	"collection": {
+		"id": "aa1d013e-b00a-4fa9-9fe6-38f676e0bcdc",
+		"name": "Firefly Collection",
+		"description": "firefly collection",
+		"icon": {
+			"hash": "",
+			"url": "https url for the icon"
+		},
+		"split":"0.07"
+	},
+	"token": {
+		"id": "token-identifier",
+		"name": "token name",
+		"description": "description",
+		"icon": {
+			"hash": "hash of the token icon",
+			"url": "https url for the icon"
+		},
+		"media": {
+			"hash": "hash of the token media",
+			"url": "https url for the media",
+			"mime": "the media mime type"
+		},
+		"attributes":{ 
+			"expired_at":"2022-12-30"
+		}
+	},
+	"checksum": {
+		"fields": [
+			"collection.id",
+			"collection.name",
+			"token.id",
+			"token.name",
+			"token.media.hash"
+		], 
+		"algorithm": "sha3-256"
+	}
+}
