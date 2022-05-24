@@ -34,8 +34,9 @@ var assetCmd = cobra.Command{
 var outputCmd = cobra.Command{
 	Use: "output",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		mixin.GenerateCollectibleTokenID("", 1)
 		ctx := cmd.Context()
-		outputs, err := mixin.NewFromAccessToken(cfg.Token).ReadCollectibleOutputs(ctx, []string{cfg.UserID}, 1, "", time.Time{}, 500)
+		outputs, err := mixin.NewFromAccessToken(cfg.User.Token).ReadCollectibleOutputs(ctx, []string{cfg.User.UserID}, 1, "", time.Time{}, 500)
 		if err != nil {
 			return err
 		}
@@ -53,7 +54,7 @@ var tokenCmd = cobra.Command{
 			return err
 		}
 
-		token, err := mixin.NewFromAccessToken(cfg.Token).ReadCollectiblesToken(ctx, tokenID)
+		token, err := cfg.Mixin.Client().ReadCollectiblesToken(ctx, tokenID) //mixin.NewFromAccessToken(cfg.User.Token).ReadCollectiblesToken(ctx, tokenID)
 		if err != nil {
 			return err
 		}
@@ -70,29 +71,30 @@ var metaDataCmd = cobra.Command{
 			return err
 		}
 
-		rsp, err := mixin.GetRestyClient().NewRequest().Get("https://thetrident.one/api/collectibles/" + metaHash)
+		metaData, err := trident.GetMetaData(metaHash)
 		if err != nil {
 			return err
 		}
 
-		return prettyPrint(rsp.Body())
+		return prettyPrint(metaData)
 	},
 }
 
 var collectionCmd = cobra.Command{
 	Use: "collection",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
 		collectionID, err := cmd.Flags().GetString("id")
 		if err != nil {
 			return err
 		}
 
-		rsp, err := mixin.GetRestyClient().NewRequest().SetAuthToken(cfg.Token).Get("/collectibles/collections/" + collectionID)
+		collection, err := mixin.NewFromAccessToken(cfg.User.Token).ReadCollectibleCollection(ctx, collectionID) //mixin.GetRestyClient().NewRequest().SetAuthToken(cfg.User.Token).Get("/collectibles/collections/" + collectionID)
 		if err != nil {
 			return err
 		}
 
-		return prettyPrint(rsp.Body())
+		return prettyPrint(collection)
 	},
 }
 
@@ -113,7 +115,7 @@ var transferNFTCmd = cobra.Command{
 
 		// get unspent outputs
 		var outputTarget *mixin.CollectibleOutput
-		os, err := mixin.NewFromAccessToken(cfg.Token).ReadCollectibleOutputs(ctx, []string{cfg.UserID}, 1, "", time.Time{}, 500)
+		os, err := mixin.NewFromAccessToken(cfg.User.Token).ReadCollectibleOutputs(ctx, []string{cfg.User.UserID}, 1, "", time.Time{}, 500)
 		if err != nil {
 			return err
 		}
@@ -127,13 +129,13 @@ var transferNFTCmd = cobra.Command{
 		}
 
 		// get token
-		token, err := mixin.NewFromAccessToken(cfg.Token).ReadCollectiblesToken(ctx, tokenID)
+		token, err := mixin.NewFromAccessToken(cfg.User.Token).ReadCollectiblesToken(ctx, tokenID)
 		if err != nil {
 			return err
 		}
 
 		// make collectible transaction
-		tran, err := mixin.NewFromAccessToken(cfg.Token).MakeCollectibleTransaction(ctx, outputTarget, token, []string{receiver}, 1)
+		tran, err := mixin.NewFromAccessToken(cfg.User.Token).MakeCollectibleTransaction(ctx, outputTarget, token, []string{receiver}, 1)
 		if err != nil {
 			return err
 		}
@@ -143,7 +145,7 @@ var transferNFTCmd = cobra.Command{
 		}
 
 		// create collectible request
-		collectibleRequest, err := mixin.NewFromAccessToken(cfg.Token).CreateCollectibleRequest(ctx, mixin.CollectibleRequestActionSign, signedTx)
+		collectibleRequest, err := mixin.NewFromAccessToken(cfg.User.Token).CreateCollectibleRequest(ctx, mixin.CollectibleRequestActionSign, signedTx)
 		if err != nil {
 			return err
 		}
@@ -169,7 +171,7 @@ var spendNFTCmd = cobra.Command{
 
 		// get unspent outputs
 		var outputTarget *mixin.CollectibleOutput
-		os, err := mixin.NewFromAccessToken(cfg.Token).ReadCollectibleOutputs(ctx, []string{cfg.UserID}, 1, "", time.Time{}, 500)
+		os, err := mixin.NewFromAccessToken(cfg.User.Token).ReadCollectibleOutputs(ctx, []string{cfg.User.UserID}, 1, "", time.Time{}, 500)
 		if err != nil {
 			return err
 		}
@@ -192,7 +194,7 @@ var spendNFTCmd = cobra.Command{
 			return errors.New("no aggregatedSignature")
 		}
 
-		hs, err := mixin.NewFromAccessToken(cfg.Token).SendRawTransaction(ctx, outputTarget.SignedTx)
+		hs, err := mixin.NewFromAccessToken(cfg.User.Token).SendRawTransaction(ctx, outputTarget.SignedTx)
 		if err != nil {
 			return err
 		}
@@ -232,7 +234,7 @@ var mintNFTCmd = cobra.Command{
 			MetaHash: hash,
 		}
 
-		rsp, err := trident.CreateMetaData(cfg.Token, &payload)
+		rsp, err := trident.CreateMetaData(cfg.User.Token, &payload)
 		if err != nil {
 			return err
 		}
@@ -262,7 +264,7 @@ var mintNFTCmd = cobra.Command{
 
 		input.OpponentMultisig.Receivers = nft.GroupMembers
 		input.OpponentMultisig.Threshold = nft.GroupThreshold
-		payment, err := mixin.NewFromAccessToken(cfg.Token).VerifyPayment(ctx, input)
+		payment, err := mixin.NewFromAccessToken(cfg.User.Token).VerifyPayment(ctx, input)
 		if err != nil {
 			return err
 		}

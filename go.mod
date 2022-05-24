@@ -3,7 +3,7 @@ module mixin_nft_cli
 go 1.18
 
 require (
-	github.com/fox-one/mixin-sdk-go v1.6.8
+	github.com/fox-one/mixin-sdk-go v1.6.9
 	github.com/spf13/cobra v1.4.0
 )
 

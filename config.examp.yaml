@@ -1,3 +1,13 @@
 base_url: https://api.mixin.one
-token: xxx
-user_id: xxx
+
+user:
+  token: xxx
+  user_id: xxx
+
+mixin:
+  client_id: 
+  client_secret: 
+  session_id: 
+  pin_code: 
+  pin_token: 
+  private_key: 
