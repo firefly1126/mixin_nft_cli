@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 
 	"mixin_nft_cli/config"
 
@@ -17,11 +18,29 @@ var root cobra.Command = cobra.Command{
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	root.PersistentFlags().StringP("config", "c", "", "configuration file path, default is ./config.yaml")
 }
 
 func initConfig() {
-	logrus.Infoln("loading config ....")
-	config.Load("config.yaml", &cfg)
+	logrus.Infoln("loading configuration ....")
+
+	cp, err := root.Flags().GetString("config")
+	if err != nil {
+		panic(err)
+	}
+
+	if cp == "" {
+		cp, err = os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+		logrus.Infoln("current dir:", cp)
+		cp = filepath.Join(cp, "config.yaml")
+		logrus.Infoln("config file path:", cp)
+	}
+
+	config.Load(cp, &cfg)
 }
 
 func prettyPrint(body interface{}) error {
